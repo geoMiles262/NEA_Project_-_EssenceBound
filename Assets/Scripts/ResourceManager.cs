@@ -4,7 +4,10 @@ public class ResourceManager : MonoBehaviour
 {
     public static ResourceManager Instance { get; private set; }
 
-    [SerializeField] private int essence = 0;
+    [SerializeField] public int essence = 0;
+
+    public event System.Action<int> OnEssenceChanged;
+    public int CurrentEssence => essence;
 
     private void Awake() 
     {
@@ -19,12 +22,13 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
-    public int CurrentEssence => essence;
+    
 
     public void AddEssence(int amount) 
     {
         essence += amount;
         Debug.Log($"Essence added: {amount}. Total essence: {essence}");
+        OnEssenceChanged?.Invoke(essence);
     }
 
     public bool SpendEssence(int amount) 
@@ -33,6 +37,7 @@ public class ResourceManager : MonoBehaviour
         {
             essence -= amount;
             Debug.Log($"Essence spent: {amount}. Remaining essence: {essence}");
+            OnEssenceChanged?.Invoke(essence);
             return true;
         } 
         else 
