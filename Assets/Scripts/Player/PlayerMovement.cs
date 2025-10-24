@@ -4,14 +4,17 @@ public class PlayerMovement : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     [Header("Movement Settings")]
-    public float moveSpeed = 5f; // Player movement speed  
+    public float walkSpeed = 5f; // Player movement speed  
+    public float runSpeed = 8f;
 
     private Rigidbody2D rb;
     private Vector2 moveDirection;
+    private Animator animator;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         rb.gravityScale = 0; // Disable gravity for top-down movement
     }   
 
@@ -19,12 +22,42 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float moveX = Input.GetAxis("Horizontal") * moveSpeed;
-        float moveY = Input.GetAxis("Vertical") * moveSpeed;
-        moveDirection = new Vector2(moveX, moveY).normalized;
-    }
-    void FixedUpdate()
-    {
-        rb.linearVelocity = moveDirection * moveSpeed;
+        moveInput.x = Input.GetAxisRaw("Horizontal");
+        moveInput.y = Input.GetAxisRaw("Vertical");
+        moveInput.Normalize();
+
+        //check shift for sprinting
+        bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        float movespeed = isRunning ? runSpeed : walkSpeed;
+
+        //gets velocity
+        rb.linearVelocity = moveInput * movespeed;
+
+        //set animator parameters
+        if (animator != null)
+        {
+            animator.SetFloat("MoveX", moveX);
+            animator.SetFloat("MoveY", moveY);
+            animator.SetFloat("Speed", moveDirection.sqrMagnitude);
+        }
+
+        //Update animator based on direction and speed
+        if (moveInput.x > 0)
+            animator.Play(isRunning ? "Run_Right" : "Walk_Right");
+        else if (moveInput.x < 0)
+            animator.Play(isRunning ? "Run_Left" : "Walk_Left");
+        else if (moveInput.y > 0)
+            animator.Play(isRunning ? "Run_Back" : "Walk_Back");
+        else if (moveInput.y < 0)
+            animator.Play(isRunning ? "Run_Front" : "Walk_Front");
+        else
+        {
+            // Idle based on last faced direction
+            AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+            if (state.IsName("Walk_Right") || state.IsName("Run_Right")) animator.Play("Idle_Right");
+            else if (state.IsName("Walk_Left") || state.IsName("Run_Left")) animator.Play("Idle_Left");
+            else if (state.IsName("Walk_Back") || state.IsName("Run_Back")) animator.Play("Idle_Back");
+            else animator.Play("Idle_Front");
+        }
     }
 }
