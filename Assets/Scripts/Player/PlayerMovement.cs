@@ -5,9 +5,9 @@ public class PlayerMovement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     [Header("Movement Settings")]
     public float walkSpeed = 5f; // Player movement speed  
-    public float runSpeed = 8f;
 
     private Rigidbody2D rb;
+    private Vector2 moveInput;
     private Vector2 moveDirection;
     private Animator animator;
 
@@ -27,8 +27,7 @@ public class PlayerMovement : MonoBehaviour
         moveInput.Normalize();
 
         //check shift for sprinting
-        bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        float movespeed = isRunning ? runSpeed : walkSpeed;
+        float movespeed = walkSpeed;
 
         //gets velocity
         rb.linearVelocity = moveInput * movespeed;
@@ -36,20 +35,20 @@ public class PlayerMovement : MonoBehaviour
         //set animator parameters
         if (animator != null)
         {
-            animator.SetFloat("MoveX", moveX);
-            animator.SetFloat("MoveY", moveY);
+            animator.SetFloat("MoveX", moveInput.x);
+            animator.SetFloat("MoveY", moveInput.y);
             animator.SetFloat("Speed", moveDirection.sqrMagnitude);
         }
 
         //Update animator based on direction and speed
         if (moveInput.x > 0)
-            animator.Play(isRunning ? "Run_Right" : "Walk_Right");
+            animator.Play("Walk_Right");
         else if (moveInput.x < 0)
-            animator.Play(isRunning ? "Run_Left" : "Walk_Left");
+            animator.Play("Walk_Left");
         else if (moveInput.y > 0)
-            animator.Play(isRunning ? "Run_Back" : "Walk_Back");
+            animator.Play("Walk_Back");
         else if (moveInput.y < 0)
-            animator.Play(isRunning ? "Run_Front" : "Walk_Front");
+            animator.Play("Walk_Front");
         else
         {
             // Idle based on last faced direction
