@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 moveDirection;
     private Animator animator;
+    private Vector2 lastMoveDirection;
 
     void Start()
     {
@@ -32,6 +33,10 @@ public class PlayerMovement : MonoBehaviour
         //gets velocity
         rb.linearVelocity = moveInput * movespeed;
 
+        // Remember last direction when moving
+        if (moveInput.sqrMagnitude > 0)
+            lastMoveDirection = moveInput;
+
         //set animator parameters
         if (animator != null)
         {
@@ -51,12 +56,17 @@ public class PlayerMovement : MonoBehaviour
             animator.Play("Walk_Front");
         else
         {
-            // Idle based on last faced direction
-            AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-            if (state.IsName("Walk_Right") || state.IsName("Run_Right")) animator.Play("Idle_Right");
-            else if (state.IsName("Walk_Left") || state.IsName("Run_Left")) animator.Play("Idle_Left");
-            else if (state.IsName("Walk_Back") || state.IsName("Run_Back")) animator.Play("Idle_Back");
-            else animator.Play("Idle_Front");
+            {
+                // No movement → idle facing last direction
+                if (lastMoveDirection.x > 0)
+                    animator.Play("Idle_Right");
+                else if (lastMoveDirection.x < 0)
+                    animator.Play("Idle_Left");
+                else if (lastMoveDirection.y > 0)
+                    animator.Play("Idle_Back");
+                else
+                    animator.Play("Idle_Front");
+            }
         }
     }
 }
