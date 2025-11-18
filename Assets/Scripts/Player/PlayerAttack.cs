@@ -11,10 +11,19 @@ public class PlayerAttack : MonoBehaviour
     private float nextAttackTime = 0f;
     private string lastDirection = "Front";
 
+    public bool isAttacking = false;
+    private float attackTime = 0.3f;
+    private float attackTimer = 0f;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         animator = GetComponent<Animator>();
+
+        foreach (var clip in animator.runtimeAnimatorController.animationClips)
+        {
+            Debug.Log("Animation Clip: " + clip.name);
+        }
     }
 
     // Update is called once per frame
@@ -30,7 +39,8 @@ public class PlayerAttack : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Attack Clicked!");
+            isAttacking = true;
+            Debug.Log("Attack function being called.");
             Attack();
         }
     }
@@ -48,10 +58,19 @@ public class PlayerAttack : MonoBehaviour
 
     void Attack()
     {
-        animator.Play("Attack_" + lastDirection);
+        if (isAttacking) 
+        {
+            Debug.Log("Attack clicked!");
+            attackTimer = attackTime;
+
+            animator.Play("Attack_" + lastDirection);
+            isAttacking = false;
+        }
+        
+        //animator.Play("Attack_" + lastDirection);
 
         Vector2 attackDir = Vector2.zero;
-        switch (lastDirection)
+       /* switch (lastDirection)
         {
             case "Right":
                 attackDir = Vector2.right;
@@ -65,7 +84,8 @@ public class PlayerAttack : MonoBehaviour
             case "Front":
                 attackDir = Vector2.down;
                 break;
-        }
+        }   
+       
 
         Vector2 attackPos = (Vector2)transform.position + attackDir * attackRange;
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPos, attackRange, enemyLayer);
@@ -75,6 +95,7 @@ public class PlayerAttack : MonoBehaviour
             enemy.GetComponent<EnemyHealth>().TakeDamage(attackdamage);
 
         }
+       */
 
     }
     void OnDrawGizmosSelected() 

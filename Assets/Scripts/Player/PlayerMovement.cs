@@ -11,10 +11,12 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveDirection;
     private Animator animator;
     private Vector2 lastMoveDirection;
+    private PlayerAttack attackScript;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        attackScript = GetComponent<PlayerAttack>();
         animator = GetComponent<Animator>();
         rb.gravityScale = 0; // Disable gravity for top-down movement
     }   
@@ -23,6 +25,13 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (attackScript != null && attackScript.isAttacking)
+        {
+            // STOP movement animation from overriding attack animation
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
         moveInput.Normalize();
